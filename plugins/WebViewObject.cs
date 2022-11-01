@@ -378,6 +378,13 @@ public class WebViewObject : MonoBehaviour
     private static extern void _gree_unity_webview_destroy(string name);
 #endif
 
+    public static void SetLogEnable(bool enable)
+    {
+#if !UNITY_EDITOR && UNITY_ANDROID
+        (new AndroidJavaObject("net.gree.unitywebview.Logger")).CallStatic("SetLogEnable", enable);
+#endif
+    }
+
     public static void ProloadUrl(string url)
     {
 #if !UNITY_EDITOR && UNITY_ANDROID
