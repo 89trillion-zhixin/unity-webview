@@ -554,7 +554,7 @@ public class CWebViewPlugin {
                 layout.setBackgroundColor(0x00000000);
                 mVideoView = null;
             }
-            webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+            webView.loadUrl("about:blank");
             layout.removeView(webView);
             webView.destroy();
         }});

@@ -64,14 +64,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (tempWebView != null) {
                     tempWebView.stopLoading();
-                    tempWebView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+                    tempWebView.loadUrl("about:blank");
                     webviewContainer.removeView(tempWebView);
                     tempWebView.destroy();
                     tempWebView = null;
                 }
 
                 webView.stopLoading();
-                webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+                webView.loadUrl("about:blank");
             }
         });
     }
