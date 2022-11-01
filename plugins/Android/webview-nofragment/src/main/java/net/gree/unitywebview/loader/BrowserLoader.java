@@ -49,7 +49,7 @@ public class BrowserLoader {
         return sInstance;
     }
 
-    public static void ProloadUrl(final String url) {
+    public static void PreloadUrl(final String url) {
         final Activity a = UnityPlayer.currentActivity;
         a.runOnUiThread(new Runnable() {
             public void run() {
