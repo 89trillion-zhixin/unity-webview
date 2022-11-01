@@ -440,7 +440,7 @@ public class CWebViewPlugin {
                         return false;
                     }
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    PackageManager pm = a.getPackageManager();
+                    // PackageManager pm = a.getPackageManager();
                     // List<ResolveInfo> apps = pm.queryIntentActivities(intent, 0);
                     // if (apps.size() > 0) {
                     //     view.getContext().startActivity(intent);
@@ -454,61 +454,9 @@ public class CWebViewPlugin {
             });
             webView.addJavascriptInterface(mWebViewPlugin , "Unity");
 
-            WebSettings webSettings = webView.getSettings();
-            if (ua != null && ua.length() > 0) {
-                webSettings.setUserAgentString(ua);
-            }
+            WebSettings webSettings = Utils.configWebViewDefaults(webView, zoom, androidForceDarkMode, ua);
+
             mWebViewUA = webSettings.getUserAgentString();
-            if (zoom) {
-                webSettings.setSupportZoom(true);
-                webSettings.setBuiltInZoomControls(true);
-            } else {
-                webSettings.setSupportZoom(false);
-                webSettings.setBuiltInZoomControls(false);
-            }
-            webSettings.setDisplayZoomControls(false);
-            webSettings.setLoadWithOverviewMode(true);
-            webSettings.setUseWideViewPort(true);
-            webSettings.setJavaScriptEnabled(true);
-            webSettings.setGeolocationEnabled(true);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                // Log.i("CWebViewPlugin", "Build.VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
-                webSettings.setAllowUniversalAccessFromFileURLs(true);
-            }
-            if (android.os.Build.VERSION.SDK_INT >= 17) {
-                webSettings.setMediaPlaybackRequiresUserGesture(false);
-            }
-            webSettings.setDatabaseEnabled(true);
-            webSettings.setDomStorageEnabled(true);
-            String databasePath = webView.getContext().getDir("databases", Context.MODE_PRIVATE).getPath();
-            webSettings.setDatabasePath(databasePath);
-            webSettings.setAllowFileAccess(true);  // cf. https://github.com/gree/unity-webview/issues/625
-
-            // cf. https://forum.unity.com/threads/unity-ios-dark-mode.805344/#post-6476051
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                switch (androidForceDarkMode) {
-                case 0:
-                    {
-                        Configuration configuration = UnityPlayer.currentActivity.getResources().getConfiguration();
-                        switch (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
-                        case Configuration.UI_MODE_NIGHT_NO:
-                            webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-                            break;
-                        case Configuration.UI_MODE_NIGHT_YES:
-                            webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-                            break;
-                        }
-                    }
-                    break;
-                case 1:
-                    webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-                    break;
-                case 2:
-                    webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-                    break;
-                }
-            }
 
             if (transparent) {
                 webView.setBackgroundColor(0x00000000);
@@ -606,6 +554,7 @@ public class CWebViewPlugin {
                 layout.setBackgroundColor(0x00000000);
                 mVideoView = null;
             }
+            webView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
             layout.removeView(webView);
             webView.destroy();
         }});
@@ -914,6 +863,9 @@ public class CWebViewPlugin {
            CookieManager.getInstance().flush();
         } else {
            final Activity a = UnityPlayer.currentActivity;
+           if (CWebViewPlugin.isDestroyed(a)) {
+               return;
+           }
            CookieSyncManager cookieSyncManager = CookieSyncManager.createInstance(a);
            cookieSyncManager.startSync();
            CookieManager cookieManager = CookieManager.getInstance();
