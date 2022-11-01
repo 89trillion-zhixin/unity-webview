@@ -385,10 +385,10 @@ public class WebViewObject : MonoBehaviour
 #endif
     }
 
-    public static void ProloadUrl(string url)
+    public static void PreloadUrl(string url)
     {
 #if !UNITY_EDITOR && UNITY_ANDROID
-        (new AndroidJavaObject("net.gree.unitywebview.loader.BrowserLoader")).CallStatic("ProloadUrl", url);
+        (new AndroidJavaObject("net.gree.unitywebview.loader.BrowserLoader")).CallStatic("PreloadUrl", url);
 #endif
     }
 
