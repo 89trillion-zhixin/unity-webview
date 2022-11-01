@@ -991,16 +991,18 @@ public class CWebViewPlugin extends Fragment {
         if (CWebViewPlugin.isDestroyed(a)) {
             return;
         }
+
+        final WebView webView = mWebView;
         a.runOnUiThread(new Runnable() {public void run() {
-            if (mWebView == null) {
+            if (webView == null) {
                 return;
             }
             if (visibility) {
-                mWebView.setVisibility(View.VISIBLE);
+                webView.setVisibility(View.VISIBLE);
                 layout.requestFocus();
-                mWebView.requestFocus();
+                webView.requestFocus();
             } else {
-                mWebView.setVisibility(View.GONE);
+                webView.setVisibility(View.GONE);
             }
         }});
     }
