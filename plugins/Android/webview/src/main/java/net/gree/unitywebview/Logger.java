@@ -11,38 +11,44 @@ public class Logger {
 
     private static final String TAG = "Logger";
 
+    private static boolean LogEnable = false;
+
+    public static void SetLogEnable(boolean enable) {
+        LogEnable = enable;
+    }
+
     public static void d(String tag, String message) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.d(tag, message);
         }
     }
 
     public static void d(String tag, String message, Throwable throwable) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.d(tag, message, throwable);
         }
     }
 
     public static void e(String tag, String message) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.e(tag, message);
         }
     }
 
     public static void e(String tag, String message, Throwable throwable) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.e(tag, message, throwable);
         }
     }
 
     public static void i(String tag, String message) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.i(tag, message);
         }
     }
 
     public static void i(String tag, String... message) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             StringBuilder sb = new StringBuilder();
             for (String msg : message) {
                 sb.append(msg);
@@ -52,7 +58,7 @@ public class Logger {
     }
 
     public static void i(String tag, String message, Throwable throwable) {
-        if (BuildConfig.DEBUG) {
+        if (LogEnable) {
             Log.i(tag, message, throwable);
         }
     }
