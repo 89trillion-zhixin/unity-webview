@@ -14,7 +14,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import com.unity3d.player.UnityPlayer;
 
@@ -50,7 +49,7 @@ public class BrowserLoader {
         return sInstance;
     }
 
-    public static void ProloadUrl(String url){
+    public static void ProloadUrl(String url) {
         final Activity a = UnityPlayer.currentActivity;
         getInstance(a).preloadUrl(url, false, 1, "");
     }
@@ -275,7 +274,6 @@ public class BrowserLoader {
                         }
                         if (mPreloadUrlSet.contains(url)) {
                             Logger.d(TAG, "preload url:" + url + " complete");
-                            Toast.makeText(mAppContext, "预加载完成", Toast.LENGTH_SHORT).show();
                         }
                     }
                     destroyWebView(url);

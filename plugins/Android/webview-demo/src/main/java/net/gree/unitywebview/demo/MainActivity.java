@@ -34,7 +34,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "开始预加载", Toast.LENGTH_SHORT).show();
 
-                BrowserLoader.getInstance(getApplicationContext()).preloadUrl(url, false, 1, "");
+                BrowserLoader browserLoader = BrowserLoader.getInstance(getApplicationContext());
+                browserLoader.registerLoadStateListener(url, new BrowserLoader.LoadStateListener() {
+                    @Override
+                    public void onLoadComplete() {
+                        Toast.makeText(view.getContext(), "预加载完成", Toast.LENGTH_SHORT).show();
+                        browserLoader.unregisterOnLoadStateListener(url);
+                    }
+
+                    @Override
+                    public void onLoadFailed(int errorCode, String description) {
+                        browserLoader.unregisterOnLoadStateListener(url);
+                    }
+                });
+                browserLoader.preloadUrl(url, false, 1, "");
             }
         });
 
