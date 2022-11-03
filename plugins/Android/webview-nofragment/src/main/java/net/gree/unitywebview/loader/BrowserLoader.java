@@ -222,7 +222,7 @@ public class BrowserLoader {
                     mUrlLoadStateListeners.get(url).onLoadFailed(errorCode, description);
                 }
                 String msg = url + "@" + errorCode + "@" + description;
-                UnityPlayer.UnitySendMessage("WebViewDelegator", "PreviewLoadFailed", msg);
+                UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadFailed", msg);
                 Logger.e(TAG, "Load failed with onReceivedError: " + description);
             }
 
@@ -235,7 +235,7 @@ public class BrowserLoader {
                     mUrlLoadStateListeners.get(url).onLoadFailed(errorResponse.getStatusCode(), errorResponse.getReasonPhrase());
                 }
                 String msg = url + "@" + errorResponse.getStatusCode() + "@" + errorResponse.getReasonPhrase();
-                UnityPlayer.UnitySendMessage("WebViewDelegator", "PreviewLoadFailed", msg);
+                UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadFailed", msg);
                 Logger.e(TAG, "Load failed with onReceivedHttpError: " + errorResponse.getReasonPhrase());
             }
 
@@ -281,7 +281,7 @@ public class BrowserLoader {
                         if (mUrlLoadStateListeners != null && mUrlLoadStateListeners.containsKey(url)) {
                             mUrlLoadStateListeners.get(url).onLoadComplete();
                         }
-                        UnityPlayer.UnitySendMessage("WebViewDelegator", "PreviewLoadComplete", url);
+                        UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadComplete", url);
                         if (mPreloadUrlSet.contains(url)) {
                             Logger.d(TAG, "preload url:" + url + " complete");
                         }
