@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
@@ -57,6 +58,14 @@ public class BrowserLoader {
             }
         });
     }
+
+    public static boolean IsLoadComplete(final String url) {
+        final Activity a = UnityPlayer.currentActivity;
+        boolean result = getInstance(a).isLoadComplete(url);
+        Log.d("dedpp", "Android IsLoadComplete = {url}");
+        return result;
+    }
+
 
     private Context mAppContext;
     // Collection for preload url links.
