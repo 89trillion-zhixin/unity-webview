@@ -27,11 +27,6 @@ import java.util.Set;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-/**
- * A class for manage load/preload web resource by Android {@link WebView}.
- * Created by Zaccc on 2017/12/7.
- */
-
 public class BrowserLoader {
 
     private static final String TAG = BrowserLoader.class.getSimpleName();
