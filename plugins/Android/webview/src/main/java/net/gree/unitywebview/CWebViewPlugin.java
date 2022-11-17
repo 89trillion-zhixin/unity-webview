@@ -295,7 +295,8 @@ public class CWebViewPlugin extends Fragment {
         return mWebView != null;
     }
 
-    public void Init(final String gameObject, final boolean transparent, final boolean zoom, final int androidForceDarkMode, final String ua) {
+    public void Init(final String gameObject, final boolean zoom, final int androidForceDarkMode, final String ua) {
+        Log.d("CWebViewPlugin", "Init CWebViewPlugin");
         final CWebViewPlugin self = this;
         final Activity a = UnityPlayer.currentActivity;
         instanceCount++;
@@ -628,9 +629,7 @@ public class CWebViewPlugin extends Fragment {
 
             mWebViewUA = webSettings.getUserAgentString();
 
-            if (transparent) {
-                webView.setBackgroundColor(0x00000000);
-            }
+            webView.setBackgroundColor(0x00000000);
 
             // cf. https://stackoverflow.com/questions/3853794/disable-webview-touch-events-in-android/3856199#3856199
             webView.setOnTouchListener(
@@ -700,6 +699,12 @@ public class CWebViewPlugin extends Fragment {
             }
         };
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
+    }
+
+    public void SetTransparent(final boolean transparent) {
+        if (mWebView != null) {
+            mWebView.setBackgroundColor(transparent ? 0x00000000 : 0xFFFFFFFF);
+        }
     }
 
     private void ProcessChooser() {
@@ -789,6 +794,7 @@ public class CWebViewPlugin extends Fragment {
                 mVideoView = null;
             }
             webView.loadUrl("about:blank");
+            webView.clearHistory();
             layout.removeView(webView);
             webView.destroy();
 
@@ -806,6 +812,27 @@ public class CWebViewPlugin extends Fragment {
             }
 
         }});
+    }
+
+    public void Hide() {
+        final Activity a = UnityPlayer.currentActivity;
+        final CWebViewPlugin self = this;
+        final WebView webView = mWebView;
+        mMessages.clear();
+        if (CWebViewPlugin.isDestroyed(a)) {
+            return;
+        }
+        a.runOnUiThread(new Runnable() {
+            public void run() {
+                if (webView == null) {
+                    return;
+                }
+                webView.stopLoading();
+                webView.loadUrl("about:blank");
+                webView.clearHistory();
+                webView.setVisibility(View.GONE);
+            }
+        });
     }
 
     public boolean SetURLPattern(final String allowPattern, final String denyPattern, final String hookPattern)
