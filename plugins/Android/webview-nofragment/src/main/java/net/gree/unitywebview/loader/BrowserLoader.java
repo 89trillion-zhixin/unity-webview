@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebChromeClient;
@@ -52,6 +53,14 @@ public class BrowserLoader {
             }
         });
     }
+
+    public static boolean IsLoadComplete(final String url) {
+        final Activity a = UnityPlayer.currentActivity;
+        boolean result = getInstance(a).isLoadComplete(url);
+        Log.d("dedpp", "Android IsLoadComplete = {url}");
+        return result;
+    }
+
 
     private Context mAppContext;
     // Collection for preload url links.
@@ -132,9 +141,6 @@ public class BrowserLoader {
      * @param url given url to load.
      */
     public void preloadUrl(@NonNull String url, final boolean zoom, final int androidForceDarkMode, final String ua) {
-
-        WebView webView = prepareWebView(mAppContext, zoom, androidForceDarkMode, ua);
-
         if (!Utils.isValidUrl(url)) {
             throw new IllegalArgumentException("You shouldn't load url with an invalid url");
         }
@@ -143,6 +149,7 @@ public class BrowserLoader {
         if (!isPreloadUrl(url)) {
             // If there is no same url in the preload url set, we will load it.
             mPreloadUrlSet.add(url);
+            WebView webView = prepareWebView(mAppContext, zoom, androidForceDarkMode, ua);
             loadUrl(url, webView);
         }
     }
@@ -219,6 +226,10 @@ public class BrowserLoader {
                 String msg = url + "@" + errorCode + "@" + description;
                 UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadFailed", msg);
                 Logger.e(TAG, "Load failed with onReceivedError: " + description);
+                if (mPreloadUrlSet.contains(url)) {
+                    mPreloadUrlSet.remove(url);
+                    Logger.d(TAG, "preload url:" + url + " finish");
+                }
             }
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -232,6 +243,10 @@ public class BrowserLoader {
                 String msg = url + "@" + errorResponse.getStatusCode() + "@" + errorResponse.getReasonPhrase();
                 UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadFailed", msg);
                 Logger.e(TAG, "Load failed with onReceivedHttpError: " + errorResponse.getReasonPhrase());
+                if (mPreloadUrlSet.contains(url)) {
+                    mPreloadUrlSet.remove(url);
+                    Logger.d(TAG, "preload url:" + url + " finish");
+                }
             }
 
             @TargetApi(Build.VERSION_CODES.O)
@@ -251,6 +266,18 @@ public class BrowserLoader {
                         }
                         String url = view.getOriginalUrl();
                         destroyWebView(url);
+                        int errorCode = -1;
+                        String description = "low memory";
+                        if (mUrlLoadStateListeners != null && mUrlLoadStateListeners.containsKey(url)) {
+                            mUrlLoadStateListeners.get(url).onLoadFailed(errorCode, description);
+                        }
+                        String msg = url + "@" + errorCode + "@" + description;
+                        UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadFailed", msg);
+                        Logger.e(TAG, "Load failed with onReceivedHttpError: " + description);
+                        if (mPreloadUrlSet.contains(url)) {
+                            mPreloadUrlSet.remove(url);
+                            Logger.d(TAG, "preload url:" + url + " finish");
+                        }
                     }
 
                     // By this point, the instance variable "mWebView" is guaranteed
@@ -278,7 +305,8 @@ public class BrowserLoader {
                         }
                         UnityPlayer.UnitySendMessage("WebViewDelegator", "PreloadLoadComplete", url);
                         if (mPreloadUrlSet.contains(url)) {
-                            Logger.d(TAG, "preload url:" + url + " complete");
+                            mPreloadUrlSet.remove(url);
+                            Logger.d(TAG, "preload url:" + url + " finish");
                         }
                     }
                 }
