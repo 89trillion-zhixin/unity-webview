@@ -38,7 +38,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -296,7 +295,7 @@ public class CWebViewPlugin extends Fragment {
     }
 
     public void Init(final String gameObject, final boolean zoom, final int androidForceDarkMode, final String ua) {
-        Log.d("CWebViewPlugin", "Init CWebViewPlugin");
+        Logger.d("CWebViewPlugin", "Init CWebViewPlugin");
         final CWebViewPlugin self = this;
         final Activity a = UnityPlayer.currentActivity;
         instanceCount++;
@@ -717,7 +716,7 @@ public class CWebViewPlugin extends Fragment {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.e("CWebViewPlugin", "Unable to create Image File", ex);
+                Logger.e("CWebViewPlugin", "Unable to create Image File", ex);
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {

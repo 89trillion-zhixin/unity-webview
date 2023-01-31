@@ -57,7 +57,7 @@ public class BrowserLoader {
     public static boolean IsLoadComplete(final String url) {
         final Activity a = UnityPlayer.currentActivity;
         boolean result = getInstance(a).isLoadComplete(url);
-        Log.d("dedpp", "Android IsLoadComplete = {url}");
+        Logger.d("dedpp", "Android IsLoadComplete = {url}");
         return result;
     }
 
