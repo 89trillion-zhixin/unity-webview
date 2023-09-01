@@ -38,7 +38,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -295,7 +294,8 @@ public class CWebViewPlugin extends Fragment {
         return mWebView != null;
     }
 
-    public void Init(final String gameObject, final boolean transparent, final boolean zoom, final int androidForceDarkMode, final String ua) {
+    public void Init(final String gameObject, final boolean zoom, final int androidForceDarkMode, final String ua) {
+        Logger.d("CWebViewPlugin", "Init CWebViewPlugin");
         final CWebViewPlugin self = this;
         final Activity a = UnityPlayer.currentActivity;
         instanceCount++;
@@ -624,65 +624,11 @@ public class CWebViewPlugin extends Fragment {
             });
             webView.addJavascriptInterface(mWebViewPlugin , "Unity");
 
-            WebSettings webSettings = webView.getSettings();
-            if (ua != null && ua.length() > 0) {
-                webSettings.setUserAgentString(ua);
-            }
+            WebSettings webSettings = Utils.configWebViewDefaults(webView, zoom, androidForceDarkMode, ua);
+
             mWebViewUA = webSettings.getUserAgentString();
-            if (zoom) {
-                webSettings.setSupportZoom(true);
-                webSettings.setBuiltInZoomControls(true);
-            } else {
-                webSettings.setSupportZoom(false);
-                webSettings.setBuiltInZoomControls(false);
-            }
-            webSettings.setDisplayZoomControls(false);
-            webSettings.setLoadWithOverviewMode(true);
-            webSettings.setUseWideViewPort(true);
-            webSettings.setJavaScriptEnabled(true);
-            webSettings.setGeolocationEnabled(true);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                // Log.i("CWebViewPlugin", "Build.VERSION.SDK_INT = " + Build.VERSION.SDK_INT);
-                webSettings.setAllowUniversalAccessFromFileURLs(true);
-            }
-            if (android.os.Build.VERSION.SDK_INT >= 17) {
-                webSettings.setMediaPlaybackRequiresUserGesture(false);
-            }
-            webSettings.setDatabaseEnabled(true);
-            webSettings.setDomStorageEnabled(true);
-            String databasePath = webView.getContext().getDir("databases", Context.MODE_PRIVATE).getPath();
-            webSettings.setDatabasePath(databasePath);
-            webSettings.setAllowFileAccess(true);  // cf. https://github.com/gree/unity-webview/issues/625
-
-            // cf. https://forum.unity.com/threads/unity-ios-dark-mode.805344/#post-6476051
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                switch (androidForceDarkMode) {
-                case 0:
-                    {
-                        Configuration configuration = UnityPlayer.currentActivity.getResources().getConfiguration();
-                        switch (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
-                        case Configuration.UI_MODE_NIGHT_NO:
-                            webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-                            break;
-                        case Configuration.UI_MODE_NIGHT_YES:
-                            webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-                            break;
-                        }
-                    }
-                    break;
-                case 1:
-                    webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
-                    break;
-                case 2:
-                    webSettings.setForceDark(WebSettings.FORCE_DARK_ON);
-                    break;
-                }
-            }
-
-            if (transparent) {
-                webView.setBackgroundColor(0x00000000);
-            }
+            webView.setBackgroundColor(0x00000000);
 
             // cf. https://stackoverflow.com/questions/3853794/disable-webview-touch-events-in-android/3856199#3856199
             webView.setOnTouchListener(
@@ -754,6 +700,12 @@ public class CWebViewPlugin extends Fragment {
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(mGlobalLayoutListener);
     }
 
+    public void SetTransparent(final boolean transparent) {
+        if (mWebView != null) {
+            mWebView.setBackgroundColor(transparent ? 0x00000000 : 0xFFFFFFFF);
+        }
+    }
+
     private void ProcessChooser() {
         mCameraPhotoUri = null;
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -764,7 +716,7 @@ public class CWebViewPlugin extends Fragment {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.e("CWebViewPlugin", "Unable to create Image File", ex);
+                Logger.e("CWebViewPlugin", "Unable to create Image File", ex);
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -840,6 +792,8 @@ public class CWebViewPlugin extends Fragment {
                 layout.setBackgroundColor(0x00000000);
                 mVideoView = null;
             }
+            webView.loadUrl("about:blank");
+            webView.clearHistory();
             layout.removeView(webView);
             webView.destroy();
 
@@ -857,6 +811,27 @@ public class CWebViewPlugin extends Fragment {
             }
 
         }});
+    }
+
+    public void Hide() {
+        final Activity a = UnityPlayer.currentActivity;
+        final CWebViewPlugin self = this;
+        final WebView webView = mWebView;
+        mMessages.clear();
+        if (CWebViewPlugin.isDestroyed(a)) {
+            return;
+        }
+        a.runOnUiThread(new Runnable() {
+            public void run() {
+                if (webView == null) {
+                    return;
+                }
+                webView.stopLoading();
+                webView.loadUrl("about:blank");
+                webView.clearHistory();
+                webView.setVisibility(View.GONE);
+            }
+        });
     }
 
     public boolean SetURLPattern(final String allowPattern, final String denyPattern, final String hookPattern)
@@ -991,16 +966,18 @@ public class CWebViewPlugin extends Fragment {
         if (CWebViewPlugin.isDestroyed(a)) {
             return;
         }
+
+        final WebView webView = mWebView;
         a.runOnUiThread(new Runnable() {public void run() {
-            if (mWebView == null) {
+            if (webView == null) {
                 return;
             }
             if (visibility) {
-                mWebView.setVisibility(View.VISIBLE);
+                webView.setVisibility(View.VISIBLE);
                 layout.requestFocus();
-                mWebView.requestFocus();
+                webView.requestFocus();
             } else {
-                mWebView.setVisibility(View.GONE);
+                webView.setVisibility(View.GONE);
             }
         }});
     }
